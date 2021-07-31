@@ -1,0 +1,40 @@
+<html>
+	<head>
+		<script type="text/javascript" src="brython.js"></script>
+		<script type="text/javascript" src="brython_stdlib.js"></script>
+	</head>
+	<body onload="brython(10)">
+		<script type="text/python">
+from browser import alert
+from browser import bind, document
+from server import Server
+
+class ChatServer(Server):
+	def __init__(self, url, element):
+		super.__init__(url)
+		self._element = element
+	def recv(self, message):
+#		self._element.value += message
+		alert("message")
+	def open(self, event):
+		alert("open")
+	def error(self, event):
+		alert("error")
+#		alert('error: '+event.data)
+
+server = None
+@bind('#send', 'click')
+def open(ev):
+	global server
+	if server == None:
+		server = ChatServer('ws://localhost:8765/', document['messages'])
+	server.send(document['message'].value)
+	alert('click')
+	document['message'] = ''
+		</script>
+		<input  id="name" />
+		<div    id="messages" />
+		<input  id="message" />
+		<button id="send" type="button">Senden</button>
+	</body>
+</html>
