@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+
+import asyncio
+import websockets
+
+clients = set()
+
+async def bcast(websocket, message):
+	for client in clients:
+		if client is not websocket:
+			await client.send(message)
+
+async def handle_protocol(websocket, path):
+	#print('client connected')
+	clients.add(websocket)
+	try:
+		aiter = websocket.__aiter__()
+		userinfo = await aiter.__anext__()
+		#print('%s joined'%userinfo)
+		await bcast(websocket, '%s joined'%userinfo)
+		try:
+			while True:
+				message = await aiter.__anext__()
+				print('broadcasting from %s: %s'%(userinfo,message))
+				await bcast(websocket, message)
+		except StopAsyncIteration:
+			pass
+		await bcast(websocket, '%s left'%userinfo)
+	finally:
+		clients.remove(websocket)
+		#print('client disconnected')
+
+asyncio.get_event_loop().run_until_complete(websockets.serve(handle_protocol, "localhost", 8765))
+try:
+	asyncio.get_event_loop().run_forever()
+except KeyboardInterrupt:
+	print('')
+# vim:ts=2:
