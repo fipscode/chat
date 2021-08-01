@@ -6,7 +6,7 @@
 	<body onload="brython(10)">
 		<script type="text/python">
 from browser import alert
-from browser import bind, document
+from browser import bind, document, timer
 from server import Server
 
 class ChatServer(Server):
@@ -14,24 +14,29 @@ class ChatServer(Server):
 		super().__init__(url)
 		self._element = element
 	def recv(self, message):
-		self._element.value += message
-	def open(self, event):
-		self._elemt.value += 'connection to server opened'
+		self._element.html += message + '<br>'
 	def error(self, event):
 		self._element.value += 'error: %s'%event.data
 
 server = None
+connected = False
 @bind('#send', 'click')
-def open(ev):
+def send(ev):
 	global server
 	if server == None:
 		server = ChatServer('ws://localhost:8765/', document['messages'])
+		timer.set_timeout(send, 1000, ev)
+		return
+	global connected
+	if not connected:
+		server.send(document['name'].value)
+		connected = True
 	server.send(document['message'].value)
-	document['message'] = ''
+	document['message'].value = ''
 		</script>
 		<input  id="name" />
-		<div    id="messages" />
 		<input  id="message" />
+		<div    id="messages" />
 		<button id="send" type="button">Senden</button>
 	</body>
 </html>
