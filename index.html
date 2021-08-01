@@ -11,16 +11,14 @@ from server import Server
 
 class ChatServer(Server):
 	def __init__(self, url, element):
-		super.__init__(url)
+		super().__init__(url)
 		self._element = element
 	def recv(self, message):
-#		self._element.value += message
-		alert("message")
+		self._element.value += message
 	def open(self, event):
-		alert("open")
+		self._elemt.value += 'connection to server opened'
 	def error(self, event):
-		alert("error")
-#		alert('error: '+event.data)
+		self._element.value += 'error: %s'%event.data
 
 server = None
 @bind('#send', 'click')
@@ -29,7 +27,6 @@ def open(ev):
 	if server == None:
 		server = ChatServer('ws://localhost:8765/', document['messages'])
 	server.send(document['message'].value)
-	alert('click')
 	document['message'] = ''
 		</script>
 		<input  id="name" />
